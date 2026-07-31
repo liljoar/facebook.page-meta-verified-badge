@@ -1,6 +1,3 @@
-Below is a professional **`SECURITY.md`** template suitable for a GitHub repository documenting a **Facebook Page Meta Verified Badge** project. It is written as documentation only and does not imply affiliation with Meta.
-
-```md
 # 🔒 Security Policy
 
 ## Overview
