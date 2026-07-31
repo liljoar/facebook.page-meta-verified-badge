@@ -1,6 +1,3 @@
-Here's a GitHub-style `README.md` in a technical "decoding/documentation" format for a **Facebook Page Meta Verified Badge** project.
-
-````md
 # 🔵 Facebook Page Meta Verified Badge
 
 > Technical documentation explaining the Meta Verified badge system for Facebook Pages.
